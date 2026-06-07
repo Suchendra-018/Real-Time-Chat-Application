@@ -62,3 +62,169 @@
 .received {
   background: #374151;
 }
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 14px;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.sent {
+  background: #7c3aed;
+  color: white;
+  align-self: flex-end;
+}
+
+.received {
+  background: #374151;
+  color: white;
+  align-self: flex-start;
+}
+.chat-container {
+  display: flex;
+  height: 100vh;
+  background: #0b1324;
+}
+
+.sidebar {
+  width: 320px;
+  background: #1f2937;
+  color: white;
+  padding: 20px;
+  border-right: 1px solid #374151;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  margin: 0;
+}
+
+.search-box {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+  margin: 15px 0;
+  font-size: 15px;
+}
+
+.user-item {
+  padding: 15px;
+  background: #374151;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.user-item:hover {
+  background: #4b5563;
+  border-color: #7c3aed;
+}
+
+.chat-area {
+  flex: 1;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  height: 75px;
+  border-bottom: 1px solid #374151;
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  gap: 12px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #7c3aed;
+}
+
+.chat-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 14px;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.sent {
+  background: #7c3aed;
+  color: white;
+  align-self: flex-end;
+}
+
+.received {
+  background: #374151;
+  color: white;
+  align-self: flex-start;
+}
+
+.message-input-container {
+  border-top: 1px solid #374151;
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+}
+
+.send-btn {
+  background: #7c3aed;
+  color: white;
+  border: none;
+  padding: 14px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.send-btn:hover {
+  background: #6d28d9;
+}
+.selected-user {
+  background: #7c3aed !important;
+  border-color: #a78bfa !important;
+}
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+}

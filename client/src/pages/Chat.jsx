@@ -1,14 +1,16 @@
-
+import socket from "../socket/socket";
+import { useEffect, useState, useRef } from "react";
 import "../styles/chat.css";
-import { useEffect, useState } from "react";
 import {
   searchUsers,
   getConversation,
   sendMessage,
 } from "../services/authService";
+import { useNavigate } from "react-router-dom";
+
+
 
 function Chat() {
-  const username = localStorage.getItem("username");
   const currentUserId =
   localStorage.getItem("userId");
 
@@ -19,10 +21,55 @@ function Chat() {
   useState(null);
   const [newMessage, setNewMessage] =
   useState("");
+  const navigate = useNavigate();
+  const username = localStorage.getItem("username");
+  console.log("Chat component loaded");
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+
+  useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
+
+useEffect(() => {
+  socket.on("connect", () => {
+    console.log("Connected:", socket.id);
+  });
+
+  return () => {
+    socket.off("connect");
+  };
+}, []);
+
+useEffect(() => {
+  socket.on("receive_message", (data) => {
+    if (
+      selectedUser &&
+      (data.sender === selectedUser._id ||
+        data.receiver === selectedUser._id)
+    ) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          _id: Date.now(),
+          sender: data.sender,
+          receiver: data.receiver,
+          content: data.content,
+        },
+      ]);
+    }
+  });
+
+  return () => {
+    socket.off("receive_message");
+  };
+}, [selectedUser]);
 
   const fetchUsers = async () => {
     try {
@@ -55,6 +102,11 @@ const handleSendMessage = async () => {
       receiver: selectedUser._id,
       content: newMessage,
     });
+    socket.emit("send_message", {
+  sender: currentUserId,
+  receiver: selectedUser._id,
+  content: newMessage,
+});
 
     const data = await getConversation(
       currentUserId,
@@ -67,12 +119,34 @@ const handleSendMessage = async () => {
     console.log(error);
   }
 };
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("userId");
+
+  navigate("/");
+};
 
   return (
     <div className="chat-container">
       <div className="sidebar">
-        <h2>GhostChat</h2>
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  }}
+>
+  <h2>GhostChat</h2>
 
+  <button
+   className="logout-btn"
+    onClick={handleLogout}
+  >
+    Logout
+  </button>
+</div>
         <p>{username}</p>
 
         <input
@@ -93,53 +167,138 @@ const handleSendMessage = async () => {
           .map((user) => (
             <div
                 key={user._id}
-                className="user-item"
+                className={
+  selectedUser?._id === user._id
+    ? "user-item selected-user"
+    : "user-item"
+}
                  onClick={() =>
                 loadConversation(user)
          }
 >
-              {user.username}
+              <>
+  <div
+    style={{
+      fontWeight: "bold",
+      marginBottom: "4px",
+    }}
+  >
+    {user.username}
+  </div>
+
+  <small
+    style={{
+      color: "#d1d5db",
+    }}
+  >
+    Click to chat
+  </small>
+</>
             </div>
           ))}
       </div>
 
       <div className="chat-area">
-  <h2>
-    {selectedUser
-      ? selectedUser.username
-      : "Select a User"}
-  </h2>
 
-  <div>
-    {messages.map((message) => (
-      <p key={message._id}>
-        {message.content}
-      </p>
-    ))}
+  <div className="chat-header">
+    <div className="avatar"></div>
+
+    <div>
+      <h3>
+        {selectedUser
+          ? selectedUser.username
+          : "GhostChat"}
+      </h3>
+    </div>
+  </div>
+
+  <div className="chat-content">
+
+    {selectedUser ? (
+
+      <>
+        <div className="messages-container">
+          
+          {messages.map((message) => (
+            <div
+              key={message._id}
+              className={
+                message.sender === currentUserId
+                  ? "message sent"
+                  : "message received"
+              }
+            >
+              {message.content}
+              <div ref={messagesEndRef}></div>
+            </div>
+          ))}
+        </div>
+
+      </>
+
+    ) : (
+
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "150px",
+        }}
+      >
+        <h1>GhostChat</h1>
+
+        <p>
+          Privacy First Messaging
+        </p>
+
+        <br />
+
+        <p>
+          • One Time View Messages
+        </p>
+
+        <p>
+          • Secure Conversations
+        </p>
+
+        <p>
+          • Lightweight & Fast
+        </p>
+
+      </div>
+
+    )}
+
   </div>
 
   {selectedUser && (
-    <div
-      style={{
-        marginTop: "20px",
-      }}
-    >
+    <div className="message-input-container">
+
       <input
+        className="message-input"
         value={newMessage}
         onChange={(e) =>
           setNewMessage(e.target.value)
         }
-        placeholder="Type message..."
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSendMessage();
+          }
+        }}
+        placeholder="Type a message..."
       />
 
       <button
+        className="send-btn"
         onClick={handleSendMessage}
       >
         Send
       </button>
+
     </div>
   )}
+
 </div>
+  
     </div>
   );
 }
