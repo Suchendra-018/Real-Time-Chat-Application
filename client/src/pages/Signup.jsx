@@ -1,7 +1,11 @@
 import "../styles/auth.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signupUser } from "../services/authService";
+import {
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
 function Signup() {
   const navigate = useNavigate();
@@ -10,6 +14,16 @@ function Signup() {
     username: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  useEffect(() => {
+    setFormData({
+      username: "",
+      password: "",
+    });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -24,7 +38,9 @@ function Signup() {
     try {
       await signupUser(formData);
 
-    alert("Account created successfully");
+      alert(
+        "Account created successfully"
+      );
 
       navigate("/");
     } catch (error) {
@@ -41,20 +57,62 @@ function Signup() {
         <h1>Create Account</h1>
         <p>Join GhostChat</p>
 
-        <form onSubmit={handleSubmit}>
+        <form
+  onSubmit={handleSubmit}
+  autoComplete="off"
+>
           <input
             type="text"
             name="username"
             placeholder="Username"
+            value={formData.username}
             onChange={handleChange}
           />
+          <div
+  style={{
+    position: "relative",
+    width: "100%",
+  }}
+>
+  <input
+    type={
+      showPassword
+        ? "text"
+        : "password"
+    }
+    name="password"
+    placeholder="Password"
+    value={formData.password}
+    onChange={handleChange}
+    style={{
+      width: "100%",
+      paddingRight: "45px",
+    }}
+  />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-          />
+  <span
+    onClick={() =>
+      setShowPassword(
+        !showPassword
+      )
+    }
+    style={{
+      position: "absolute",
+      right: "15px",
+      top: "50%",
+      transform:
+        "translateY(-50%)",
+      cursor: "pointer",
+      color: "#6b7280",
+    }}
+  >
+    {showPassword ? (
+      <FaEyeSlash />
+    ) : (
+      <FaEye />
+    )}
+  </span>
+</div>
 
           <button type="submit">
             Sign Up
@@ -63,7 +121,9 @@ function Signup() {
 
         <p>
           Already have an account?{" "}
-          <Link to="/">Login</Link>
+          <Link to="/">
+            Login
+          </Link>
         </p>
       </div>
     </div>

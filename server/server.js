@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const http = require("http");
 const { Server } = require("socket.io");
+const onlineUsers = new Set();
 
 
 dotenv.config();
@@ -43,13 +44,32 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
 
-  socket.on("join_room", (userId) => {
-    socket.join(userId);
-
-    console.log(
-      `User ${userId} joined room`
+  socket.on(
+  "request_online_users",
+  () => {
+    io.emit(
+      "online_users",
+      Array.from(onlineUsers)
     );
-  });
+  }
+);
+
+  socket.on("join_room", (userId) => {
+  socket.join(userId);
+
+  socket.userId = userId;
+
+onlineUsers.add(userId);
+
+io.emit(
+  "online_users",
+  [...onlineUsers]
+);
+
+  console.log(
+    `User ${userId} joined room`
+  );
+});
 
   socket.on("send_message", (data) => {
     io.to(data.receiver).emit(
@@ -59,11 +79,29 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(
-      "User Disconnected:",
-      socket.id
-    );
-  });
+
+  if (socket.userId) {
+  onlineUsers.delete(
+    socket.userId
+  );
+}
+
+io.emit(
+  "online_users",
+  [...onlineUsers]
+);
+  io.emit(
+    "online_users",
+    Array.from(
+      onlineUsers.values()
+    )
+  );
+
+  console.log(
+    "User Disconnected:",
+    socket.id
+  );
+});
 });
 
 const PORT = process.env.PORT || 5000;

@@ -16,6 +16,7 @@ function Chat() {
   console.log("Current User ID:", currentUserId);
 
   const [users, setUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [messages, setMessages] = useState([]);
   const [selectedUser, setSelectedUser] =
@@ -30,6 +31,31 @@ function Chat() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+
+  const handleOnlineUsers = (users) => {
+    console.log("Online Users:", users);
+    setOnlineUsers(users);
+  };
+
+  socket.on(
+    "online_users",
+    handleOnlineUsers
+  );
+
+  socket.emit(
+    "request_online_users"
+  );
+
+  return () => {
+    socket.off(
+      "online_users",
+      handleOnlineUsers
+    );
+  };
+
+}, []);
 
 
   useEffect(() => {
@@ -50,7 +76,10 @@ useEffect(() => {
     "Joined room:",
     currentUserId
   );
-},[currentUserId]);
+
+  return () => {};
+}, []);
+
 
 useEffect(() => {
   socket.on("receive_message", (data) => {
@@ -76,6 +105,8 @@ useEffect(() => {
   };
 }, [selectedUser]);
 
+
+
   const fetchUsers = async () => {
     try {
       const data = await searchUsers();
@@ -84,6 +115,8 @@ useEffect(() => {
       console.log(error);
     }
   };
+
+
   const loadConversation = async (user) => {
   try {
     setSelectedUser(user);
@@ -98,6 +131,8 @@ useEffect(() => {
     console.log(error);
   }
 };
+
+
 const handleSendMessage = async () => {
   const content = newMessage.trim();
 
@@ -126,14 +161,19 @@ const handleSendMessage = async () => {
     console.log(error);
   }
 };
+
+
 const handleLogout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
-  localStorage.removeItem("userId");
+  socket.disconnect();
 
-  navigate("/");
+  localStorage.clear();
+
+  navigate("/", {
+    replace: true,
+  });
+
+  window.location.reload();
 };
-
   return (
     <div className="chat-container">
       <div className="sidebar">
@@ -194,12 +234,16 @@ const handleLogout = () => {
   </div>
 
   <small
-    style={{
-      color: "#d1d5db",
-    }}
-  >
-    Click to chat
-  </small>
+  style={{
+    color: onlineUsers.includes(user._id)
+      ? "#22c55e"
+      : "#9ca3af",
+  }}
+>
+  {onlineUsers.includes(user._id)
+    ? "Online"
+    : "Offline"}
+</small>
 </>
             </div>
           ))}
