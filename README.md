@@ -1,4 +1,4 @@
-# GhostChat
+# Real Time chat Application-GhostChat
 
 A Privacy-First Real-Time Messaging Platform
 
